@@ -3,31 +3,28 @@ from core import my_reqs, get_reqs, get_agents, get_passwords, get_files, get_ic
 
 
 def page(markup, number, list, call, callback_cancel):
-    if len(list) != 10:
-        max_nums = number
-    else:
-        max_nums = 'None'
-
+    max_nums = number if len(list) != 10 else 'None'
     if str(number) == '1':
-        item1 = types.InlineKeyboardButton(f"⏹", callback_data=f'None')
+        item1 = types.InlineKeyboardButton("⏹", callback_data='None')
     else:
-        item1 = types.InlineKeyboardButton(f"◀️", callback_data=f'{call}:{int(number) - 1}')
+        item1 = types.InlineKeyboardButton(
+            "◀️", callback_data=f'{call}:{int(number) - 1}'
+        )
 
     if str(number) == str(max_nums):
-        item2 = types.InlineKeyboardButton(f"⏹", callback_data=f'None')
+        item2 = types.InlineKeyboardButton("⏹", callback_data='None')
     else:
-        item2 = types.InlineKeyboardButton(f"▶️", callback_data=f'{call}:{int(number) + 1}')
+        item2 = types.InlineKeyboardButton(
+            "▶️", callback_data=f'{call}:{int(number) + 1}'
+        )
 
     item3 = types.InlineKeyboardButton("Назад", callback_data=callback_cancel)
 
     if callback_cancel != 'None':
         markup.add(item1, item3, item2)
-    else:
-        if str(number) == '1' and str(number) == str(max_nums):
-            pass
-        else:
-            markup.add(item1, item2)
-    
+    elif str(number) != '1' or str(number) != str(max_nums):
+        markup.add(item1, item2)
+
     return markup 
 
 
@@ -115,12 +112,8 @@ def markup_request_action(req_id, req_status, callback):
 
         markup_request_action.add(item1, item2)
 
-    elif req_status == 'answered' or req_status == 'waiting':
-        if 'my_reqs:' in formatted_callback:
-            status_user = 'user'
-        else:
-            status_user = 'agent'
-
+    elif req_status in ['answered', 'waiting']:
+        status_user = 'user' if 'my_reqs:' in formatted_callback else 'agent'
         item1 = types.InlineKeyboardButton("✏️ Добавить сообщение", callback_data=f'add_message:{req_id}:{status_user}')
         item2 = types.InlineKeyboardButton("🗂 Показать файлы", callback_data=f'req_files:{req_id}:{callback}:1')
 

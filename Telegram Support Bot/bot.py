@@ -53,14 +53,14 @@ def send_text(message):
 
     elif message.text == '✉️ Мои запросы':
         markup_and_value = markup.markup_reqs(user_id, 'my_reqs', '1')
-        markup_req = markup_and_value[0]
         value = markup_and_value[1]
 
         if value == 0:
             bot.send_message(message.chat.id, 'У вас пока ещё нет запросов.', reply_markup=markup.markup_main())
         else:
+            markup_req = markup_and_value[0]
             bot.send_message(message.chat.id, 'Ваши запросы:', reply_markup=markup_req)
-    
+
     else:
         bot.send_message(message.chat.id, 'Вы возвращены в главное меню.', parse_mode='html', reply_markup=markup.markup_main())
 
@@ -69,7 +69,7 @@ def get_password_message(message):
     password = message.text
     user_id = message.from_user.id
 
-    if password == None:
+    if password is None:
         send_message = bot.send_message(message.chat.id, '⚠️ Вы отправляете не текст. Попробуйте еще раз.', reply_markup=markup.markup_cancel())
 
         bot.clear_step_handler_by_chat_id(message.chat.id)
@@ -96,7 +96,7 @@ def get_password_message(message):
 def get_agent_id_message(message):
     agent_id = message.text
 
-    if agent_id == None:
+    if agent_id is None:
         take_agent_id_message = bot.send_message(message.chat.id, '⚠️ Вы отправляете не текст. Попробуйте еще раз.', reply_markup=markup.markup_cancel())
 
         bot.clear_step_handler_by_chat_id(message.chat.id)
@@ -118,27 +118,8 @@ def get_new_request(message):
     check_file = core.get_file(message)
 
     #Если пользователь отправляет файл
-    if check_file != None:
-        file_id = check_file['file_id']
-        file_name = check_file['file_name']
-        type = check_file['type']
-        request = check_file['text']
-
-        if str(request) == 'None':
-            take_new_request = bot.send_message(message.chat.id, '⚠️ Вы не ввели ваш запрос. Попробуйте ещё раз, отправив текст вместе с файлом.', reply_markup=markup.markup_cancel())
-
-            bot.clear_step_handler_by_chat_id(message.chat.id)
-            bot.register_next_step_handler(take_new_request, get_new_request)
-
-        else:
-            req_id = core.new_req(user_id, request)
-            core.add_file(req_id, file_id, file_name, type)
-
-            bot.send_message(message.chat.id, f'✅ Ваш запрос под ID {req_id} создан. Посмотреть текущие запросы можно нажав кнопку <b>Мои текущие запросы</b>', parse_mode='html', reply_markup=markup.markup_main())        
-    
-    #Если пользователь отправляет только текст
-    else:
-        if request == None:
+    if check_file is None:
+        if request is None:
             take_new_request = bot.send_message(message.chat.id, '⚠️ Отправляемый вами тип данных не поддерживается в боте. Попробуйте еще раз отправить ваш запрос, использовав один из доступных типов данных (текст, файлы, фото, видео, аудио, голосовые сообщения)', reply_markup=markup.markup_cancel())
 
             bot.clear_step_handler_by_chat_id(message.chat.id)
@@ -152,11 +133,29 @@ def get_new_request(message):
             req_id = core.new_req(user_id, request)
             bot.send_message(message.chat.id, f'✅ Ваш запрос под ID {req_id} создан. Посмотреть текущие запросы можно нажав кнопку <b>Мои текущие запросы</b>', parse_mode='html', reply_markup=markup.markup_main())
 
+    else:
+        request = check_file['text']
+
+        if str(request) == 'None':
+            take_new_request = bot.send_message(message.chat.id, '⚠️ Вы не ввели ваш запрос. Попробуйте ещё раз, отправив текст вместе с файлом.', reply_markup=markup.markup_cancel())
+
+            bot.clear_step_handler_by_chat_id(message.chat.id)
+            bot.register_next_step_handler(take_new_request, get_new_request)
+
+        else:
+            req_id = core.new_req(user_id, request)
+            file_id = check_file['file_id']
+            file_name = check_file['file_name']
+            type = check_file['type']
+            core.add_file(req_id, file_id, file_name, type)
+
+            bot.send_message(message.chat.id, f'✅ Ваш запрос под ID {req_id} создан. Посмотреть текущие запросы можно нажав кнопку <b>Мои текущие запросы</b>', parse_mode='html', reply_markup=markup.markup_main())
+
 
 def get_additional_message(message, req_id, status):
     additional_message = message.text
     check_file = core.get_file(message)
-    
+
     #Если пользователь отправляет файл
     if check_file != None:
         file_id = check_file['file_id']
@@ -166,7 +165,7 @@ def get_additional_message(message, req_id, status):
 
         core.add_file(req_id, file_id, file_name, type)
 
-    if additional_message == None:
+    if additional_message is None:
         take_additional_message = bot.send_message(chat_id=message.chat.id, text='⚠️ Отправляемый вами тип данных не поддерживается в боте. Попробуйте еще раз отправить ваше сообщение, использовав один из доступных типов данных (текст, файлы, фото, видео, аудио, голосовые сообщения).', reply_markup=markup.markup_cancel())
 
         bot.clear_step_handler_by_chat_id(message.chat.id)
@@ -180,14 +179,15 @@ def get_additional_message(message, req_id, status):
         if additional_message != 'None':
             core.add_message(req_id, additional_message, status)
 
-        if check_file != None:
-            if additional_message != 'None':
-                text = '✅ Ваш файл и сообщение успешно отправлены!'
-            else:
-                text = '✅ Ваш файл успешно отправлен!'
-        else:
+        if check_file is None:
             text = '✅ Ваше сообщение успешно отправлено!'
-        
+
+        else:
+            text = (
+                '✅ Ваш файл и сообщение успешно отправлены!'
+                if additional_message != 'None'
+                else '✅ Ваш файл успешно отправлен!'
+            )
         bot.send_message(message.chat.id, text, reply_markup=markup.markup_main())
 
         if status == 'agent':

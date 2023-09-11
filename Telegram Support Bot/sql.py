@@ -7,7 +7,7 @@ def create_table_agents():
     cur = con.cursor()   
 
     cur.execute("CREATE TABLE IF NOT EXISTS agents(id INT NOT NULL AUTO_INCREMENT, `agent_id` VARCHAR(20), PRIMARY KEY (id))")
-    cur.execute(f"ALTER TABLE agents CONVERT TO CHARACTER SET utf8mb4")
+    cur.execute("ALTER TABLE agents CONVERT TO CHARACTER SET utf8mb4")
 
     cur.close()
     con.close()
@@ -18,7 +18,7 @@ def create_table_passwords():
     cur = con.cursor()   
 
     cur.execute("CREATE TABLE IF NOT EXISTS passwords(id INT NOT NULL AUTO_INCREMENT, `password` VARCHAR(20), PRIMARY KEY (id))")
-    cur.execute(f"ALTER TABLE passwords CONVERT TO CHARACTER SET utf8mb4")
+    cur.execute("ALTER TABLE passwords CONVERT TO CHARACTER SET utf8mb4")
 
     cur.close()
     con.close()
@@ -29,7 +29,7 @@ def create_table_files():
     cur = con.cursor()   
 
     cur.execute("CREATE TABLE IF NOT EXISTS files(id INT NOT NULL AUTO_INCREMENT, `req_id` VARCHAR(20), `file_id` VARCHAR(250), `file_name` VARCHAR(2048), `type` VARCHAR(20), PRIMARY KEY (id))")
-    cur.execute(f"ALTER TABLE files CONVERT TO CHARACTER SET utf8mb4")
+    cur.execute("ALTER TABLE files CONVERT TO CHARACTER SET utf8mb4")
 
     cur.close()
     con.close()
@@ -40,7 +40,7 @@ def create_table_requests():
     cur = con.cursor()   
 
     cur.execute("CREATE TABLE IF NOT EXISTS requests(req_id INT NOT NULL AUTO_INCREMENT, `user_id` VARCHAR(20), `req_status` VARCHAR(20), PRIMARY KEY (req_id))")
-    cur.execute(f"ALTER TABLE requests CONVERT TO CHARACTER SET utf8mb4")
+    cur.execute("ALTER TABLE requests CONVERT TO CHARACTER SET utf8mb4")
 
     cur.close()
     con.close()
@@ -51,7 +51,7 @@ def create_table_messages():
     cur = con.cursor()   
 
     cur.execute("CREATE TABLE IF NOT EXISTS messages(id INT NOT NULL AUTO_INCREMENT, `req_id` VARCHAR(20), `message` VARCHAR(4096), `user_status` VARCHAR(20), `date` VARCHAR(50), PRIMARY KEY (id))")
-    cur.execute(f"ALTER TABLE messages CONVERT TO CHARACTER SET utf8mb4")
+    cur.execute("ALTER TABLE messages CONVERT TO CHARACTER SET utf8mb4")
 
     cur.close()
     con.close()

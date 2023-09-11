@@ -103,10 +103,7 @@ def check_agent_status(user_id):
     cur.close()
     con.close()
 
-    if agent == None:
-        return False
-    else:
-        return True
+    return agent is not None
 
 
 #Проверить валидность пароля
@@ -120,10 +117,7 @@ def valid_password(password):
     cur.close()
     con.close()
 
-    if password == None:
-        return False
-    else:
-        return True
+    return password is not None
 
 
 #Проверить отправляет ли пользователь файл, если да - вернуть его
@@ -141,11 +135,10 @@ def get_file(message):
     try:
         return {'file_id': message.json['photo'][-1]['file_id'], 'file_name': date_now, 'type': 'photo', 'text': str(message.caption)}
 
-    #Если нет - проверить отправляет ли документ, видео, аудио, голосовое сообщение
     except:
         for type in types:
             try:
-                if type == 'document' or type == 'video':
+                if type in ['document', 'video']:
                     file_name = message.json[type]['file_name']
                 else:
                     file_name = date_now
@@ -153,7 +146,7 @@ def get_file(message):
                 return {'file_id': message.json[type]['file_id'], 'file_name': file_name, 'type': type, 'text': str(message.caption)}
             except:
                 pass
-    
+
         return None
 
 
@@ -195,10 +188,7 @@ def generate_passwords(number, lenght):
 
     passsords = []
     for _ in range(number):
-        password = ''
-        for _ in range(lenght):
-            password += random.choice(chars)
-
+        password = ''.join(random.choice(chars) for _ in range(lenght))
         passsords.append(password)
 
     return passsords
@@ -365,11 +355,7 @@ def get_files(number, req_id):
 
 #Получить историю запроса
 def get_request_data(req_id, callback):
-    if 'my_reqs' in callback:
-        get_dialog_user_status = 'user'
-    else:
-        get_dialog_user_status = 'agent'
-
+    get_dialog_user_status = 'user' if 'my_reqs' in callback else 'agent'
     con = pymysql.connect(host=config.MySQL[0], user=config.MySQL[1], passwd=config.MySQL[2], db=config.MySQL[3])
     cur = con.cursor()
 
@@ -381,21 +367,20 @@ def get_request_data(req_id, callback):
 
     data = []
     text = ''
-    i = 1
-
-    for message in messages:
+    for i, message in enumerate(messages, start=1):
         message_value = message[0]
         user_status = message[1]
         date = message[2] 
 
-        if user_status == 'user':
-            if get_dialog_user_status == 'user':
-                text_status = '👤 Ваше сообщение'
-            else:
-                text_status = '👤 Сообщение пользователя'
-        elif user_status == 'agent':
+        if user_status == 'agent':
             text_status = '🧑‍💻 Агент поддержки'
 
+        elif user_status == 'user':
+            text_status = (
+                '👤 Ваше сообщение'
+                if get_dialog_user_status == 'user'
+                else '👤 Сообщение пользователя'
+            )
         #Бэкап для текста
         backup_text = text
         text += f'{text_status}\n{date}\n{message_value}\n\n'
@@ -410,9 +395,7 @@ def get_request_data(req_id, callback):
             if len(text) >= 4096:
                 data.append(backup_text)
                 text = f'{text_status}\n{date}\n{message_value}\n\n'
-            
-            data.append(text)   
 
-        i += 1
+            data.append(text)   
 
     return data
